@@ -1,0 +1,23 @@
+{
+  "name": "videomaker",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/BernardoSantDev/VideoMaker#readme",
+  "bugs": {
+    "url": "https://github.com/BernardoSantDev/VideoMaker/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BernardoSantDev/VideoMaker.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "readline-sync": "^1.4.10"
+  }
+}
