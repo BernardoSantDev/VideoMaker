@@ -1,8 +1,10 @@
 const axios = require("axios")
+const sentenceBoundaryDetection = require("sbd")
 
 async function robot(content) {
     await fetchFullWikipediaContent(content)
     sanitizeContent(content)
+    breakContentIntoSentences(content)
 
     async function fetchFullWikipediaContent(content) {
         try {
@@ -38,7 +40,8 @@ async function robot(content) {
     function sanitizeContent(content) {
         const withoutBlankLinesAndMarkdown = removeBlankLinesAndMarkdown(content.sourceContentOriginal)
         const withoutDatesInParentheses = removeDatesInParentheses(withoutBlankLinesAndMarkdown)
-        console.log(withoutDatesInParentheses)
+        
+        content.sourceContentSanitized = withoutDatesInParentheses
 
         function removeBlankLinesAndMarkdown(text) {
             const allLines = text.split("\n")
@@ -49,12 +52,25 @@ async function robot(content) {
                 }
                 return true
             })
-            return withoutBlankLinesAndMarkdown.join(" ")
+            return withoutBlankLinesAndMarkdown.join(' ')
         }
     }
 
     function removeDatesInParentheses(text) {
         return text.replace(/\((?:\([^()]*\)|[^()])*\)/gm, '').replace(/  /g, ' ')
+    }
+
+    function breakContentIntoSentences(content) {
+        content.sentences = []
+
+        const sentences = sentenceBoundaryDetection.sentences(content.sourceContentSanitized)
+        sentences.forEach((sentence) => {
+            content.sentences.push({
+                text: sentence,
+                keywords: [],
+                images: []
+            })
+        })
     }
 }
 
