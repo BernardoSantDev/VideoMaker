@@ -2,6 +2,7 @@ const axios = require("axios")
 
 async function robot(content) {
     await fetchFullWikipediaContent(content)
+    sanitizeContent(content)
 
     async function fetchFullWikipediaContent(content) {
         try {
@@ -27,7 +28,6 @@ async function robot(content) {
 
             const finalText = `${content.prefix} ${content.searchTerm}.\n\n${cleanText}`
 
-            // 🔥 AQUI ESTÁ A MÁGICA
             content.sourceContentOriginal = finalText
 
         } catch (error) {
@@ -35,7 +35,28 @@ async function robot(content) {
         }
     }
 
-    return content
+    function sanitizeContent(content) {
+        const withoutBlankLinesAndMarkdown = removeBlankLinesAndMarkdown(content.sourceContentOriginal)
+        const withoutDatesInParentheses = removeDatesInParentheses(withoutBlankLinesAndMarkdown)
+        console.log(withoutDatesInParentheses)
+
+        function removeBlankLinesAndMarkdown(text) {
+            const allLines = text.split("\n")
+
+            const withoutBlankLinesAndMarkdown = allLines.filter((line) => {
+                if (line.trim().length === 0 || line.trim().startsWith("=")) {
+                    return false
+                }
+                return true
+            })
+            return withoutBlankLinesAndMarkdown.join(" ")
+        }
+    }
+
+    function removeDatesInParentheses(text) {
+        return text.replace(/\((?:\([^()]*\)|[^()])*\)/gm, '').replace(/  /g, ' ')
+    }
 }
+
 
 module.exports = robot
