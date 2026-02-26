@@ -7,7 +7,7 @@ async function robot(content) {
     breakContentIntoSentences(content)
 
     async function fetchFullWikipediaContent(content) {
-        try {
+        try {   
             const searchTermFormatted = content.searchTerm.replace(/ /g, "_")
 
             const url = `https://pt.wikipedia.org/w/api.php?action=query&prop=extracts&explaintext=true&titles=${searchTermFormatted}&format=json&origin=*`
