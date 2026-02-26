@@ -27,14 +27,15 @@ async function robot(content) {
 
             const finalText = `${content.prefix} ${content.searchTerm}.\n\n${cleanText}`
 
-            console.log("\n")
-            console.log(finalText)
-            console.log("\n")
+            // 🔥 AQUI ESTÁ A MÁGICA
+            content.sourceContentOriginal = finalText
 
         } catch (error) {
             console.log("Error:", error.response?.status || error.message)
         }
     }
+
+    return content
 }
 
 module.exports = robot
