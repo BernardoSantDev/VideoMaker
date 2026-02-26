@@ -10,7 +10,7 @@ async function robot(content) {
         try {
             const searchTermFormatted = content.searchTerm.replace(/ /g, "_")
 
-            const url = `https://en.wikipedia.org/w/api.php?action=query&prop=extracts&explaintext=true&titles=${searchTermFormatted}&format=json&origin=*`
+            const url = `https://pt.wikipedia.org/w/api.php?action=query&prop=extracts&explaintext=true&titles=${searchTermFormatted}&format=json&origin=*`
 
             const response = await axios.get(url, {
                 headers: {
