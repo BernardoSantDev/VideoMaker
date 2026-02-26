@@ -1,34 +1,40 @@
-const algorithmia = require('algorithmia')
-const algorithmiaApiKey = require('../credentials/algorithmia.json').apiKey
+const axios = require("axios")
 
-function robot(content) {
-    fetchContentFromWikipedia(content)
-    //sanitizeContent(content)
-    //beakContentIntoSentences(content)
+async function robot(content) {
+    await fetchFullWikipediaContent(content)
 
-    async function fetchContentFromWikipedia(content) {
-    console.log(`> [text-robot] Buscando conteúdo para: ${content.searchTerm}`);
-    
-    const algorithmiaAuthenticated = algorithmia(algorithmiaApiKey);
-    const wikipediaAlgorithm = algorithmiaAuthenticated.algo('web/WikipediaParser/0.1.2');
+    async function fetchFullWikipediaContent(content) {
+        try {
+            const searchTermFormatted = content.searchTerm.replace(/ /g, "_")
 
-    try {
-        // Log antes da chamada para confirmar que o código chegou aqui
-        console.log('> [text-robot] Chamando API da Algorithmia...');
-        
-        const wikipediaResponse = await wikipediaAlgorithm.pipe(content.searchTerm);
-        const wikipediaContent = wikipediaResponse.get();
+            const url = `https://en.wikipedia.org/w/api.php?action=query&prop=extracts&explaintext=true&titles=${searchTermFormatted}&format=json&origin=*`
 
-        // Verifique a estrutura do que foi retornado
-        console.log('> [text-robot] Resposta recebida com sucesso!');
-        
-        content.sourceContentOriginal = wikipediaContent.content;
-    } catch (error) {
-        // Isso vai te mostrar exatamente por que a implementação falhou
-        console.error('> [text-robot] Erro na implementação:', error.message);
-        throw error; 
+            const response = await axios.get(url, {
+                headers: {
+                    "User-Agent": "VideoMakerBot/1.0 (contact@email.com)"
+                }
+            })
+
+            const pages = response.data.query.pages
+            const page = Object.values(pages)[0]
+
+            if (!page.extract) {
+                console.log("No content found.")
+                return
+            }
+
+            const cleanText = page.extract
+
+            const finalText = `${content.prefix} ${content.searchTerm}.\n\n${cleanText}`
+
+            console.log("\n")
+            console.log(finalText)
+            console.log("\n")
+
+        } catch (error) {
+            console.log("Error:", error.response?.status || error.message)
+        }
     }
-}
 }
 
 module.exports = robot

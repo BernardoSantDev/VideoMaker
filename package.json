@@ -18,7 +18,11 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "@google/genai": "^1.43.0",
     "algorithmia": "^0.3.10",
-    "readline-sync": "^1.4.10"
+    "axios": "^1.13.5",
+    "readline-sync": "^1.4.10",
+    "wikipedia": "^2.4.2",
+    "wikipedia-tldr": "^2.0.1"
   }
 }
