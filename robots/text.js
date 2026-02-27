@@ -1,6 +1,34 @@
 const axios = require("axios")
 const sentenceBoundaryDetection = require("sbd")
 
+const credentials = require("../credentials/watson-nlu.json")
+
+const NaturalLanguageUnderstandingV1 = require('ibm-watson/natural-language-understanding/v1')
+const { IamAuthenticator } = require('ibm-watson/auth')
+
+const nlu = new NaturalLanguageUnderstandingV1({
+    version: '2021-08-01',
+    authenticator: new IamAuthenticator({
+        apikey: credentials.apikey,
+    }),
+    serviceUrl: credentials.url
+})
+
+nlu.analyze({
+    text: "The Mona Lisa is a half-length portrait painting by Leonardo da Vinci.",
+    features: {
+        keywords: {}
+    }
+})
+.then(response => {
+    console.log(JSON.stringify(response.result, null, 4))
+    process.exit()
+})
+.catch(error => {
+    console.error(error)
+})
+
+
 async function robot(content) {
     await fetchFullWikipediaContent(content)
     sanitizeContent(content)
