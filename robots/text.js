@@ -14,25 +14,12 @@ const nlu = new NaturalLanguageUnderstandingV1({
     serviceUrl: credentials.url
 })
 
-nlu.analyze({
-    text: "The Mona Lisa is a half-length portrait painting by Leonardo da Vinci.",
-    features: {
-        keywords: {}
-    }
-})
-.then(response => {
-    console.log(JSON.stringify(response.result, null, 4))
-    process.exit()
-})
-.catch(error => {
-    console.error(error)
-})
-
 
 async function robot(content) {
     await fetchFullWikipediaContent(content)
     sanitizeContent(content)
     breakContentIntoSentences(content)
+    limitMaximumSentences(content)
 
     async function fetchFullWikipediaContent(content) {
         try {   
@@ -100,6 +87,33 @@ async function robot(content) {
             })
         })
     }
+
+
+    function limitMaximumSentences(content) {
+        content.sentences = content.sentences.slice(0, content.maximumSentences)
+    }
+
+    async function fetchWatsonAndReturnKeywords(sentence) {
+    try {
+        const response = await nlu.analyze({
+            text: sentence,
+            features: {
+                keywords: {}
+            }
+        })
+
+        const keywords = response.result.keywords.map((keyword) => {
+            return keyword.text
+        })
+
+        return keywords
+
+    } catch (error) {
+        console.error(error)
+        return []
+        }
+    }
+
 }
 
 
