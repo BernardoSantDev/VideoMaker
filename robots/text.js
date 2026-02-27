@@ -1,16 +1,32 @@
 const axios = require("axios")
 const sentenceBoundaryDetection = require("sbd")
 
+const credentials = require("../credentials/watson-nlu.json")
+
+const NaturalLanguageUnderstandingV1 = require('ibm-watson/natural-language-understanding/v1')
+const { IamAuthenticator } = require('ibm-watson/auth')
+
+const nlu = new NaturalLanguageUnderstandingV1({
+    version: '2021-08-01',
+    authenticator: new IamAuthenticator({
+        apikey: credentials.apikey,
+    }),
+    serviceUrl: credentials.url
+})
+
+
 async function robot(content) {
     await fetchFullWikipediaContent(content)
     sanitizeContent(content)
     breakContentIntoSentences(content)
+    limitMaximumSentences(content)
+    await fetchKeywordsOfAllSentences(content)
 
     async function fetchFullWikipediaContent(content) {
-        try {
+        try {   
             const searchTermFormatted = content.searchTerm.replace(/ /g, "_")
 
-            const url = `https://en.wikipedia.org/w/api.php?action=query&prop=extracts&explaintext=true&titles=${searchTermFormatted}&format=json&origin=*`
+            const url = `https://pt.wikipedia.org/w/api.php?action=query&prop=extracts&explaintext=true&titles=${searchTermFormatted}&format=json&origin=*`
 
             const response = await axios.get(url, {
                 headers: {
@@ -72,7 +88,38 @@ async function robot(content) {
             })
         })
     }
+
+
+    function limitMaximumSentences(content) {
+        content.sentences = content.sentences.slice(0, content.maximumSentences)
+    }
+
+    async function fetchKeywordsOfAllSentences(content) {
+        for (const sentence of content.sentences) {
+            sentence.keywords = await fetchWatsonAndReturnKeywords(sentence.text)
+        }
+    }
+
+    async function fetchWatsonAndReturnKeywords(sentence) {
+    try {
+        const response = await nlu.analyze({
+            text: sentence,
+            features: {
+                keywords: {}
+            }
+        })
+
+        const keywords = response.result.keywords.map((keyword) => {
+            return keyword.text
+        })
+
+        return keywords
+
+    } catch (error) {
+        console.error(error)
+        return []
+        }
+    }
+
 }
-
-
 module.exports = robot
