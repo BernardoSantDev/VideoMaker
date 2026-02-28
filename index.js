@@ -5,7 +5,7 @@ const robots = {
 
 async function start() {
     
-    robots
+    robots.input()
     //await robots.text(content)
 
 }
