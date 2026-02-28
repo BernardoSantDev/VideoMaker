@@ -14,13 +14,19 @@ const nlu = new NaturalLanguageUnderstandingV1({
     serviceUrl: credentials.url
 })
 
+const state = require('./state.js')
 
-async function robot(content) {
+
+async function robot() {
+    const content = state.load()
+
     await fetchFullWikipediaContent(content)
     sanitizeContent(content)
     breakContentIntoSentences(content)
     limitMaximumSentences(content)
     await fetchKeywordsOfAllSentences(content)
+
+    state.save(content)
 
     async function fetchFullWikipediaContent(content) {
         try {   

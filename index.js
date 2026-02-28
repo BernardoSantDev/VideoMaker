@@ -4,9 +4,8 @@ const robots = {
 }
 
 async function start() {
-    
     robots.input()
-    //await robots.text(content)
+    await robots.text(content)
 
 }
 
