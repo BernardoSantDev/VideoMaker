@@ -1,5 +1,5 @@
 const readline = require('readline-sync')
-const state = require('state.js')
+const state = require('../state')
 
 function robot( ){
     const content = {
