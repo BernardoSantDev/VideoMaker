@@ -1,7 +1,6 @@
 const fs = require('fs')
 const path = require('path')
 const imageDownloader = require('image-downloader')
-const gm = require('gm').subClass({ imageMagick: true })
 const sharp = require('sharp')
 const axios = require('axios')
 const state = require('./state.js')
@@ -87,11 +86,11 @@ async function robot() {
 
     async function convertAllImages(content) {
         for (let sentenceIndex = 0; sentenceIndex < content.sentences.length; sentenceIndex++) {
-            await convertAImages(sentenceIndex)
+            await convertImages(sentenceIndex)
         }
     }
 
-    async function convertAImages(sentenceIndex) {
+    async function convertImages(sentenceIndex) {
         return new Promise((resolve, reject) => {
             const inputFile = `../content/${sentenceIndex}-original.png[0]`
             const outputFile = `../content/${sentenceIndex}-converted.png`
