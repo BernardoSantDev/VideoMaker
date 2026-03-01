@@ -1,3 +1,6 @@
+const fs = require('fs')
+const path = require('path')
+const imageDownloader = require('image-downloader')
 const axios = require('axios')
 const state = require('./state.js')
 const pexelsCredentials = require('../credentials/pexels.json')
@@ -42,8 +45,6 @@ async function robot() {
     async function downloadAllImages(content) {
         content.downloadedImages = []
 
-        content.sentences[1].images[0] = "https://images.pexels.com/photos/32591593/pexels-photo-32591593.jpeg?auto=compress&cs=tinysrgb&h=350"
-
         for (let sentenceIndex = 0; sentenceIndex < content.sentences.length; sentenceIndex++) {
             const images = content.sentences[sentenceIndex].images
 
@@ -56,7 +57,7 @@ async function robot() {
                     }
 
 
-                    //await downloadImage()
+                    await downloadAndSave(imageUrl, `${sentenceIndex}-original.png`)
                     content.downloadedImages.push(imageUrl)
                     console.log(`> [${sentenceIndex}] [${imageIndex}]  Baixou imagem com sucesso: ${imageUrl}`)
                     break
@@ -66,6 +67,19 @@ async function robot() {
                 }
             }
         }
+    }
+
+    async function downloadAndSave(url, fileName) {
+        const folderPath = path.resolve(__dirname, '..', 'content')
+
+        if (!fs.existsSync(folderPath)) {
+            fs.mkdirSync(folderPath, { recursive: true })
+        }
+
+        return imageDownloader.image({
+            url,
+            dest: path.join(folderPath, fileName)
+        })
     }
 }
 
