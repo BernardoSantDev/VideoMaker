@@ -40,6 +40,10 @@ async function robot() {
     }
 
     async function downloadAllImages(content) {
+        content.downloadedImages = []
+
+        content.sentences[1].images[0] = "https://images.pexels.com/photos/32591593/pexels-photo-32591593.jpeg?auto=compress&cs=tinysrgb&h=350"
+
         for (let sentenceIndex = 0; sentenceIndex < content.sentences.length; sentenceIndex++) {
             const images = content.sentences[sentenceIndex].images
 
@@ -47,12 +51,18 @@ async function robot() {
                 const imageUrl = images[imageIndex]
 
                 try {
+                    if (content.downloadedImages.includes(imageUrl)) {
+                        throw new Error("Imagem já foi baixada anteriormente.")
+                    }
+
+
                     //await downloadImage()
-                    console.log(`> Baixou imagem com sucesso: ${imageUrl}`)
+                    content.downloadedImages.push(imageUrl)
+                    console.log(`> [${sentenceIndex}] [${imageIndex}]  Baixou imagem com sucesso: ${imageUrl}`)
                     break
                 } 
                 catch (error) {
-                    console.log(`> Erro ao baixar (${imageUrl}): ${error}`)
+                    console.log(`> [${sentenceIndex}] [${imageIndex}]  Erro ao baixar (${imageUrl}): ${error}`)
                 }
             }
         }
