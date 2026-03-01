@@ -196,17 +196,19 @@ async function robot() {
 
     async function createYouTubeThumbnail() {
         return new Promise((resolve, reject) => {
-            gm()
-                .in(fromRoot('./content/0-converted.png'))
-                .write(fromRoot('./content/youtube-thumbnail.jpg'), (error) => {
+            const inputFile = path.resolve(__dirname, '..', 'content', '0-converted.png')
+            const outputFile = path.resolve(__dirname, '..', 'content', 'youtube-thumbnail.jpg')
+
+            gm(inputFile)
+                .write(outputFile, (error) => {
                     if (error) {
-                        return reject(error)
+                    return reject(error)
                     }
 
                     console.log('> [video-robot] YouTube thumbnail created')
                     resolve()
                 })
-         })
+        })
     }
 
 }
