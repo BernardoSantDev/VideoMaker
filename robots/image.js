@@ -5,9 +5,20 @@ const pexelsCredentials = require('../credentials/pexels.json')
 async function robot() {
     const content = state.load()
 
-    const imagesArray = await fetchImagesAndReturnImagesLinks("Michael Jackson")
-    console.dir(imagesArray, { depth: null })
-    process.exit(0)
+    await fetchImagesOfAllSentences(content)
+
+    state.save(content)
+
+    async function fetchImagesOfAllSentences(content) {
+        for (const sentence of content.sentences) {
+
+            const keyword = sentence.keywords[0] || content.searchTerm
+            const query = `${content.searchTerm} ${keyword}`
+
+            sentence.images = await fetchImagesAndReturnImagesLinks(query)
+            sentence.imageSearchQuery = query
+        }
+    }
 
     async function fetchImagesAndReturnImagesLinks(query) {
         const response = await axios.get('https://api.pexels.com/v1/search', {
