@@ -21,6 +21,7 @@
     "@google/genai": "^1.43.0",
     "algorithmia": "^0.3.10",
     "axios": "^1.13.5",
+    "gm": "^1.25.1",
     "googleapis": "^171.4.0",
     "ibm-watson": "^12.2.0",
     "image-downloader": "^4.3.0",

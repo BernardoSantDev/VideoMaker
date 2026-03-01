@@ -1,7 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 const imageDownloader = require('image-downloader')
-const sharp = require('sharp')
+const gm = require('gm').subClass({ imageMagick: true })
 const axios = require('axios')
 const state = require('./state.js')
 const pexelsCredentials = require('../credentials/pexels.json')
@@ -13,7 +13,7 @@ async function robot() {
     //await downloadAllImages(content)
     await convertAllImages(content)
 
-    //state.save(content)
+    state.save(content)
 
     async function fetchImagesOfAllSentences(content) {
         for (const sentence of content.sentences) {
@@ -33,7 +33,7 @@ async function robot() {
             },
             params: {
                 query: query,
-                per_page: 2
+                per_page: 10
             }
         })
 
@@ -86,17 +86,23 @@ async function robot() {
 
     async function convertAllImages(content) {
         for (let sentenceIndex = 0; sentenceIndex < content.sentences.length; sentenceIndex++) {
-            await convertImages(sentenceIndex)
+        await convertImage(sentenceIndex)
         }
     }
 
-    async function convertImages(sentenceIndex) {
-        return new Promise((resolve, reject) => {
-            const inputFile = `../content/${sentenceIndex}-original.png[0]`
-            const outputFile = `../content/${sentenceIndex}-converted.png`
-            const width = 1920
-            const height = 1080
-            
+    async function convertImage(sentenceIndex) {
+    return new Promise((resolve, reject) => {
+        const width = 1920
+        const height = 1080
+
+        const inputFile = path.resolve(__dirname, '..', 'content', `${sentenceIndex}-original.png`)
+        const outputFile = path.resolve(__dirname, '..', 'content', `${sentenceIndex}-converted.png`)
+
+        if (!fs.existsSync(inputFile)) {
+            console.log(`> [video-robot] Pulando imagem inexistente: ${inputFile}`)
+            return resolve()
+        }
+
             gm()
                 .in(inputFile)
                 .out('(')
@@ -116,13 +122,11 @@ async function robot() {
                 .out('-gravity', 'center')
                 .out('-compose', 'over')
                 .out('-composite')
-                .out('-resize', `${width}x${height}`)
+                .out('-extent', `${width}x${height}`)
                 .write(outputFile, (error) => {
-                    if (error) {
-                        return reject(error)
-                    }
+                    if (error) {return reject(error)}
 
-                    console.log(`> Image converted: ${inputFile}`)
+                    console.log(`> [video-robot] Image converted: ${outputFile}`)
                     resolve()
                 })
         })
