@@ -172,66 +172,32 @@ async function robot() {
                 const imgIndex = i * 2
                 const txtIndex = i * 2 + 1
 
-                // imagem base com leve zoom FAKE (muito mais rápido)
+                // imagem base (linear)
                 filterComplex += `
                 [${imgIndex}:v]
-                scale=2000:1125,
-                crop=1920:1080,
+                scale=1920:1080,
+                boxblur=10:5,
+                eq=brightness=-0.55,
+                vignette=PI/6,
                 format=rgba
                 [bg${i}];
                 `
 
-                // fundo borrado mais leve
-                filterComplex += `
-                [bg${i}]
-                boxblur=10:5,
-                eq=brightness=-0.55
-                [dark${i}];
-                `
-
-                // vinheta leve (mantida)
-                filterComplex += `
-                [bg${i}]
-                vignette=PI/6
-                [vignette${i}];
-                `
-
-                // aplica fundo escuro somente quando texto aparece
-                filterComplex += `
-                [vignette${i}][dark${i}]
-                overlay=enable='between(t,1,4)'
-                [bgdark${i}];
-                `
-
-                // sombra do texto (mais leve e já com opacidade)
+                // texto com fade (igual o que já funciona)
                 filterComplex += `
                 [${txtIndex}:v]
                 format=rgba,
-                colorchannelmixer=rr=0:gg=0:bb=0:aa=0.6
-                [shadow${i}];
-                `
-
-                // texto normal
-                filterComplex += `
-                [${txtIndex}:v]
-                format=rgba
+                fade=t=in:st=1:d=0.5:alpha=1,
+                fade=t=out:st=3.5:d=0.5:alpha=1
                 [text${i}];
                 `
 
-                // aplica sombra
+                // overlay simples (igual o que funciona)
                 filterComplex += `
-                [bgdark${i}][shadow${i}]
-                overlay=x=(W-w)/2+3:y=(H-h)/2+3:enable='between(t,1,4)'
-                [withshadow${i}];
-                `
-
-                // aplica texto
-                filterComplex += `
-                [withshadow${i}][text${i}]
-                overlay=(W-w)/2:(H-h)/2:enable='between(t,1,4)',
-                setpts=PTS+${i * sceneDuration}/TB
+                [bg${i}][text${i}]
+                overlay=(W-w)/2:(H-h)/2:enable='between(t,1,4)'
                 [scene${i}];
-                 `
+                `
             }
 
             let lastOutput = `[scene0]`
