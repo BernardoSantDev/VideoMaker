@@ -5,6 +5,7 @@ const gm = require('gm').subClass({ imageMagick: true })
 const axios = require('axios')
 const state = require('./state.js')
 const pexelsCredentials = require('../credentials/pexels.json')
+const { exec } = require('child_process')
 
 
 async function robot() {
@@ -13,6 +14,7 @@ async function robot() {
     await convertAllImages(content)
     await createAllSentenceImages(content)
     await createYouTubeThumbnail(content)
+    await renderVideo(content)
 
     state.save(content)
 
@@ -140,6 +142,135 @@ async function robot() {
                 })
         })
     }
+
+    async function renderVideo(content) {
+        return new Promise((resolve, reject) => {
+
+            const rootPath = path.resolve(__dirname, '..')
+            const contentPath = path.join(rootPath, 'content')
+            const outputPath = path.join(contentPath, 'output.mp4')
+            const musicPath = path.join(contentPath, 'music.mp3')
+
+            if (!fs.existsSync(musicPath)) {
+                return reject("Coloque music.mp3 dentro da pasta content/")
+            }
+
+            const totalScenes = content.sentences.length
+            const sceneDuration = 4
+            const transitionDuration = 0.8
+
+            let inputs = ''
+            let filterComplex = ''
+
+            for (let i = 0; i < totalScenes; i++) {
+                const imagePath = path.join(contentPath, `${i}-converted.png`)
+                const textPath = path.join(contentPath, `${i}-sentence.png`)
+
+                inputs += ` -loop 1 -t ${sceneDuration} -i "${imagePath}"`
+                inputs += ` -loop 1 -t ${sceneDuration} -i "${textPath}"`
+
+                const imgIndex = i * 2
+                const txtIndex = i * 2 + 1
+
+                // imagem base com leve zoom FAKE (muito mais rápido)
+                filterComplex += `
+                [${imgIndex}:v]
+                scale=2000:1125,
+                crop=1920:1080,
+                format=rgba
+                [bg${i}];
+                `
+
+                // fundo borrado mais leve
+                filterComplex += `
+                [bg${i}]
+                boxblur=10:5,
+                eq=brightness=-0.55
+                [dark${i}];
+                `
+
+                // vinheta leve (mantida)
+                filterComplex += `
+                [bg${i}]
+                vignette=PI/6
+                [vignette${i}];
+                `
+
+                // aplica fundo escuro somente quando texto aparece
+                filterComplex += `
+                [vignette${i}][dark${i}]
+                overlay=enable='between(t,1,4)'
+                [bgdark${i}];
+                `
+
+                // sombra do texto (mais leve e já com opacidade)
+                filterComplex += `
+                [${txtIndex}:v]
+                format=rgba,
+                colorchannelmixer=rr=0:gg=0:bb=0:aa=0.6
+                [shadow${i}];
+                `
+
+                // texto normal
+                filterComplex += `
+                [${txtIndex}:v]
+                format=rgba
+                [text${i}];
+                `
+
+                // aplica sombra
+                filterComplex += `
+                [bgdark${i}][shadow${i}]
+                overlay=x=(W-w)/2+3:y=(H-h)/2+3:enable='between(t,1,4)'
+                [withshadow${i}];
+                `
+
+                // aplica texto
+                filterComplex += `
+                [withshadow${i}][text${i}]
+                overlay=(W-w)/2:(H-h)/2:enable='between(t,1,4)',
+                setpts=PTS+${i * sceneDuration}/TB
+                [scene${i}];
+                 `
+            }
+
+            let lastOutput = `[scene0]`
+
+            for (let i = 1; i < totalScenes; i++) {
+                const offset = (sceneDuration - transitionDuration) * i
+
+                filterComplex += `${lastOutput}[scene${i}]xfade=transition=fade:duration=${transitionDuration}:offset=${offset}[xf${i}];`
+
+                lastOutput = `[xf${i}]`
+            }
+
+            filterComplex = filterComplex.replace(/\s+/g, ' ')
+
+            const finalVideoStream = totalScenes > 1
+                ? `[xf${totalScenes - 1}]`
+                : `[scene0]`
+
+            const command =
+                `ffmpeg -y ${inputs} -i "${musicPath}" ` +
+                `-filter_complex "${filterComplex} ${finalVideoStream}format=yuv420p[video]" ` +
+                `-map "[video]" -map ${totalScenes * 2}:a ` +
+                `-c:v libx264 -c:a aac -shortest "${outputPath}"`
+
+            console.log("🎬 Renderizando vídeo...")
+
+            exec(command, (error, stdout, stderr) => {
+                console.log("STDOUT:", stdout)
+                console.log("STDERR:", stderr)
+
+                if (error) {
+                    return reject(error)
+                }
+
+                resolve()
+            })
+        })
+    }
+
 }
 
 module.exports = robot
