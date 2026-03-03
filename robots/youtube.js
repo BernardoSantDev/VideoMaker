@@ -106,6 +106,43 @@ async function robot() {
 
 
     async function uploadVideo(content) {
+        const videoFilePath = './content/output.mov'
+        const videoFileSize = fs.statSync(videoFilePath).size
+        const videoTitle = `${content.prefix} ${content.searchTerm}`
+        const videoTags = [content.searchTerm, ...content.sentences[0].keywords]
+        const videoDescription = content.sentences.map((sentence) => {
+            return sentence.text
+        }).join('\n\n')
+
+        const requestParameters = {
+            part: 'snippet, status',
+            requestBody: {
+                snippet: {
+                    title: videoTitle,
+                    description: videoDescription,
+                    tags: videoTags
+                },
+                status: {
+                    privacyStatus: 'unlisted'
+                }
+            },
+            media: {
+                body: fs.createReadStream(videoFilePath)
+            }
+        }
+
+        console.log('> [youtube-robot] Starting to upload the video to YouTube')
+        const youtubeResponse = await youtube.videos.insert(requestParameters, {
+            onUploadProgress: onUploadProgress
+        })
+
+        console.log(`> [youtube-robot] Video available at: https://youtu.be/${youtubeResponse.data.id}`)
+        return youtubeResponse.data
+
+        function onUploadProgress(event) {
+            const progress = Math.round( (event.bytesRead / videoFileSize) * 100 )
+            console.log(`> [youtube-robot] ${progress}% completed`)
+        }
 
     }
 
