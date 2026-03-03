@@ -1,8 +1,10 @@
-const { auth } = require('googleapis/build/src/apis/youtube')
-const state = require('./state.js')
 const express = require('express')
 const google = require('googleapis').google
+const youtube = google.youtube({ version: 'v3'})
 const OAuth2 = google.auth.OAuth2
+const state = require('./state.js')
+const fs = require('fs')
+
 
 async function robot() {
     const content = state.load()
