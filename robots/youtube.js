@@ -10,7 +10,7 @@ async function robot() {
     const content = state.load()
 
     await authenticateWithOAuth()
-    //await uploadVideo(content)
+    const videoInformation = await uploadVideo(content)
     //await uploadThumbnail(content)
 
     async function authenticateWithOAuth() {
@@ -103,6 +103,13 @@ async function robot() {
             })
         }
     }
+
+
+    async function uploadVideo(content) {
+
+    }
+
+
 
 }
 
