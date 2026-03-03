@@ -145,6 +145,9 @@ async function robot() {
 
     async function renderVideo(content) {
         return new Promise((resolve, reject) => {
+            const path = require('path')
+            const fs = require('fs')
+            const { exec } = require('child_process')
 
             const rootPath = path.resolve(__dirname, '..')
             const contentPath = path.join(rootPath, 'content')
@@ -172,18 +175,31 @@ async function robot() {
                 const imgIndex = i * 2
                 const txtIndex = i * 2 + 1
 
-                // imagem base (linear)
+                // 1. O SEGREDO: split=2 divide a imagem inicial em DUAS cópias idênticas
                 filterComplex += `
                 [${imgIndex}:v]
                 scale=1920:1080,
+                format=rgba,
+                split=2[base${i}_normal][base${i}_blur];
+                `
+
+                // 2. Aplicamos o blur e brilho apenas na cópia "_blur"
+                filterComplex += `
+                [base${i}_blur]
                 boxblur=10:5,
                 eq=brightness=-0.55,
-                vignette=PI/6,
-                format=rgba
+                vignette=PI/6
+                [dark${i}];
+                `
+
+                // 3. Juntamos a cópia "_normal" com a "dark" após 1 segundo
+                filterComplex += `
+                [base${i}_normal][dark${i}]
+                overlay=enable='gte(t,2)'
                 [bg${i}];
                 `
 
-                // texto com fade (igual o que já funciona)
+                // 4. Texto com fade (mantido igual ao seu)
                 filterComplex += `
                 [${txtIndex}:v]
                 format=rgba,
@@ -192,7 +208,7 @@ async function robot() {
                 [text${i}];
                 `
 
-                // overlay simples (igual o que funciona)
+                // 5. Overlay do texto em cima do fundo da cena (mantido igual)
                 filterComplex += `
                 [bg${i}][text${i}]
                 overlay=(W-w)/2:(H-h)/2:enable='between(t,1,4)'
@@ -225,13 +241,10 @@ async function robot() {
             console.log("🎬 Renderizando vídeo...")
 
             exec(command, (error, stdout, stderr) => {
-                console.log("STDOUT:", stdout)
-                console.log("STDERR:", stderr)
-
                 if (error) {
+                    console.log("STDERR:", stderr)
                     return reject(error)
                 }
-
                 resolve()
             })
         })
