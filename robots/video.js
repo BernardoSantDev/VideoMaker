@@ -1,12 +1,11 @@
-const fs = require('fs')
-const path = require('path')
 const imageDownloader = require('image-downloader')
 const gm = require('gm').subClass({ imageMagick: true })
 const axios = require('axios')
 const state = require('./state.js')
 const pexelsCredentials = require('../credentials/pexels.json')
+const path = require('path')
+const fs = require('fs')
 const { exec } = require('child_process')
-
 
 async function robot() {
     const content = state.load()
@@ -145,10 +144,6 @@ async function robot() {
 
     async function renderVideo(content) {
         return new Promise((resolve, reject) => {
-            const path = require('path')
-            const fs = require('fs')
-            const { exec } = require('child_process')
-
             const rootPath = path.resolve(__dirname, '..')
             const contentPath = path.join(rootPath, 'content')
             const outputPath = path.join(contentPath, 'output.mp4')
