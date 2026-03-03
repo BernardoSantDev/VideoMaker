@@ -14,7 +14,7 @@ async function robot() {
     async function authenticateWithOAuth() {
         const webServer = await startWebServer()
         const OAuthClient = await createOAuthClient()
-        //await requestUserConsent()
+        requestUserConsent(OAuthClient)
         //await waitForGoogleCallback()
         //await requestGoogleForAccessTokens()
         //await setGlobalGoogleAuthentication()
@@ -48,7 +48,16 @@ async function robot() {
             return OAuthClient
         }
 
-        
+        function requestUserConsent(OAuthClient) {
+            const consentUrl = OAuthClient.generateAuthUrl({
+                access_type: 'offline',
+                scope: ['https://www.googleapis.com/auth/youtube']
+            })
+
+            console.log(`> [youtube-robot] Please give your consent: ${consentUrl}`)
+        }
+
+
         
     }
 
