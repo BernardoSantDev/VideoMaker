@@ -106,7 +106,7 @@ async function robot() {
 
 
     async function uploadVideo(content) {
-        const videoFilePath = './content/output.mov'
+        const videoFilePath = './content/output.mp4'
         const videoFileSize = fs.statSync(videoFilePath).size
         const videoTitle = `${content.prefix} ${content.searchTerm}`
         const videoTags = [content.searchTerm, ...content.sentences[0].keywords]
@@ -157,8 +157,15 @@ async function robot() {
             }
         }
 
-        const youtubeResponse = await youtube.thumbnails.set(requestParameters)
-        console.log(`> [youtube-robot] Thumbnail uploaded!`)
+        try {
+            console.log('> [youtube-robot] Starting to upload thumbnail...')
+            const youtubeResponse = await youtube.thumbnails.set(requestParameters)
+            console.log(`> [youtube-robot] Thumbnail uploaded!`)
+        } catch (error) {
+            console.log(`> [youtube-robot] ⚠️ Aviso: O YouTube bloqueou o upload da Thumbnail.`)
+            console.log(`> [youtube-robot] Mensagem do YouTube: ${error.message}`)
+            console.log(`> [youtube-robot] O vídeo foi upado sem capa personalizada. Verifique as permissões do canal no YouTube Studio.`)
+        }
     }
 
 }
