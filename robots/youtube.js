@@ -20,7 +20,7 @@ async function robot() {
         const authorizationToken = await waitForGoogleCallback(webServer)
         await requestGoogleForAccessTokens(OAuthClient, authorizationToken)
         await setGlobalGoogleAuthentication(OAuthClient)
-        //await stopWebServer(webServer)
+        await stopWebServer(webServer)
 
         async function startWebServer() {
             return new Promise((resolve, reject) => {
@@ -95,8 +95,13 @@ async function robot() {
             })
         }
 
-
-        
+        async function stopWebServer(webServer) {
+            return new Promise((resolve, reject) => {
+                webServer.server.close(() => {
+                    resolve()
+                })
+            })
+        }
     }
 
 }
