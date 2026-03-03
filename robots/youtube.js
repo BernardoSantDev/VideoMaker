@@ -146,7 +146,19 @@ async function robot() {
     }
 
     async function uploadThumbnail(videoInformation) {
-        
+        const videoId = videoInformation.id
+        const videoThumbnailFilePath = './content/youtube-thumbnail.jpg'
+
+        const requestParameters = {
+            videoId: videoId,
+            media: {
+                mimeType: 'image/jpeg',
+                body: fs.createReadStream(videoThumbnailFilePath)
+            }
+        }
+
+        const youtubeResponse = await youtube.thumbnails.set(requestParameters)
+        console.log(`> [youtube-robot] Thumbnail uploaded!`)
     }
 
 }
