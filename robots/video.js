@@ -159,7 +159,7 @@ async function robot() {
             }
 
             const totalScenes = content.sentences.length
-            const sceneDuration = 4
+            const sceneDuration = 7
             const transitionDuration = 0.8
 
             let inputs = ''
@@ -175,7 +175,7 @@ async function robot() {
                 const imgIndex = i * 2
                 const txtIndex = i * 2 + 1
 
-                // 1. O SEGREDO: split=2 divide a imagem inicial em DUAS cópias idênticas
+                // 1. Divide a imagem em duas cópias
                 filterComplex += `
                 [${imgIndex}:v]
                 scale=1920:1080,
@@ -192,26 +192,29 @@ async function robot() {
                 [dark${i}];
                 `
 
-                // 3. Juntamos a cópia "_normal" com a "dark" após 1 segundo
+                // 3. Juntamos a cópia "_normal" com a "dark" aos 2 segundos
                 filterComplex += `
                 [base${i}_normal][dark${i}]
                 overlay=enable='gte(t,2)'
                 [bg${i}];
                 `
 
-                // 4. Texto com fade (mantido igual ao seu)
+                // 4. Texto com fade
+                // Fade-in começa aos 2s. 
+                // Fade-out começa aos 6.5s (para terminar suavemente no segundo 7)
                 filterComplex += `
                 [${txtIndex}:v]
                 format=rgba,
-                fade=t=in:st=1:d=0.5:alpha=1,
-                fade=t=out:st=3.5:d=0.5:alpha=1
+                fade=t=in:st=2:d=0.5:alpha=1,
+                fade=t=out:st=6.5:d=0.5:alpha=1
                 [text${i}];
                 `
 
-                // 5. Overlay do texto em cima do fundo da cena (mantido igual)
+                // 5. Overlay do texto em cima do fundo da cena
+                // O texto fica visível do segundo 2 até o segundo 7
                 filterComplex += `
                 [bg${i}][text${i}]
-                overlay=(W-w)/2:(H-h)/2:enable='between(t,1,4)'
+                overlay=(W-w)/2:(H-h)/2:enable='between(t,2,7)'
                 [scene${i}];
                 `
             }
