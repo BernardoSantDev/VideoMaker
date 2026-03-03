@@ -18,9 +18,9 @@ async function robot() {
         const OAuthClient = await createOAuthClient()
         requestUserConsent(OAuthClient)
         const authorizationToken = await waitForGoogleCallback(webServer)
-        //await requestGoogleForAccessTokens()
-        //await setGlobalGoogleAuthentication()
-        //await stopWebServer()
+        await requestGoogleForAccessTokens(OAuthClient, authorizationToken)
+        //await setGlobalGoogleAuthentication(OAuthClient)
+        //await stopWebServer(webServer)
 
         async function startWebServer() {
             return new Promise((resolve, reject) => {
@@ -58,7 +58,7 @@ async function robot() {
 
             console.log(`> [youtube-robot] Please give your consent: ${consentUrl}`)
         }
-        
+
 
          async function waitForGoogleCallback(webServer) {
             return new Promise((resolve, reject) => {
@@ -70,6 +70,21 @@ async function robot() {
 
                 res.send('<h1>Thank you!</h1><p>Now close this tab.</p>')
                 resolve(authCode)
+                })
+            })
+        }
+
+        async function requestGoogleForAccessTokens(OAuthClient, authorizationToken) {
+            return new Promise((resolve, reject) => {
+                OAuthClient.getToken(authorizationToken, (error, tokens) => {
+                    if (error) {
+                        return reject(error)
+                    }
+
+                    console.log('> [youtube-robot] Access tokens received!')
+
+                    OAuthClient.setCredentials(tokens)
+                    resolve()
                 })
             })
         }
