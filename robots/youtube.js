@@ -11,7 +11,7 @@ async function robot() {
 
     await authenticateWithOAuth()
     const videoInformation = await uploadVideo(content)
-    //await uploadThumbnail(content)
+    await uploadThumbnail(videoInformation)
 
     async function authenticateWithOAuth() {
         const webServer = await startWebServer()
@@ -143,10 +143,11 @@ async function robot() {
             const progress = Math.round( (event.bytesRead / videoFileSize) * 100 )
             console.log(`> [youtube-robot] ${progress}% completed`)
         }
-
     }
 
-
+    async function uploadThumbnail(videoInformation) {
+        
+    }
 
 }
 
