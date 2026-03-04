@@ -7,6 +7,7 @@ const state = require('./state.js')
 const pexelsCredentials = require('../credentials/pexels.json')
 
 async function robot() {
+    console.log("> [image-robot] Iniciando...")
     const content = state.load()
 
     await fetchImagesOfAllSentences(content)
@@ -19,7 +20,7 @@ async function robot() {
 
             const keyword = sentence.keywords[0] || content.searchTerm
             const query = `${content.searchTerm} ${keyword}`
-
+            console.log(`> [image-robot] Buscando imagens para a consulta: "${query}"`)
             sentence.images = await fetchImagesAndReturnImagesLinks(query)
             sentence.imageSearchQuery = query
         }
@@ -32,7 +33,7 @@ async function robot() {
             },
             params: {
                 query: query,
-                per_page: 10
+                per_page: 15
             }
         })
 

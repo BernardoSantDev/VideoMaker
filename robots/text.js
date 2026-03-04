@@ -18,6 +18,7 @@ const state = require('./state.js')
 
 
 async function robot() {
+    console.log("> [text-robot] Iniciando...")
     const content = state.load()
 
     await fetchFullWikipediaContent(content)
@@ -29,6 +30,7 @@ async function robot() {
     state.save(content)
 
     async function fetchFullWikipediaContent(content) {
+        console.log(`> [text-robot] Buscando conteúdo na Wikipédia`)
         try {   
             const searchTermFormatted = content.searchTerm.replace(/ /g, "_")
 
@@ -57,6 +59,7 @@ async function robot() {
         } catch (error) {
             console.log("Error:", error.response?.status || error.message)
         }
+        console.log(`> [text-robot] Busca concluída!`)
     }
 
     function sanitizeContent(content) {
@@ -101,8 +104,11 @@ async function robot() {
     }
 
     async function fetchKeywordsOfAllSentences(content) {
+        console.log(`> [text-robot] Começando a buscar palavras-chave no Watson`)
         for (const sentence of content.sentences) {
+            console.log(`> [text-robot] Sentença: "${sentence.text}"`)
             sentence.keywords = await fetchWatsonAndReturnKeywords(sentence.text)
+            console.log(`> [text-robot] Palavras-chave: ${sentence.keywords.join(", ")}`)
         }
     }
 

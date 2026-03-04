@@ -8,6 +8,7 @@ const fs = require('fs')
 const { exec } = require('child_process')
 
 async function robot() {
+    console.log('> [video-robot] Iniciando...')
     const content = state.load()
 
     await convertAllImages(content)
@@ -59,9 +60,10 @@ async function robot() {
                     .write(outputFile, (error) => {
                         if (error) {return reject(error)}
 
-                        console.log(`> [video-robot] Image converted: ${outputFile}`)
+                        console.log(`> [video-robot] Image convertida: ${outputFile}`)
                         resolve()
                     })
+                    
         })
     }
 
@@ -76,40 +78,21 @@ async function robot() {
         return new Promise((resolve, reject) => {
             const outputFile = path.resolve(__dirname, '..', 'content', `${sentenceIndex}-sentence.png`)
 
-            const templateSettings = {
-                0: {
-                    size: '1920x400',
-                    gravity: 'center'
-                },
-                1: {
-                    size: '1920x1080',
-                    gravity: 'center'
-                },
-                2: {
-                    size: '800x1080',
-                    gravity: 'west'
-                },
-                3: {
-                    size: '1920x400',
-                    gravity: 'center'
-                },
-                4: {
-                    size: '1920x1080',
-                    gravity: 'center'
-                },
-                5: {
-                    size: '800x1080',
-                    gravity: 'west'
-                },
-                6: {
-                    size: '1920x400',
-                    gravity: 'center'
-                }
-            }
+            const templates = [
+                { size: '1920x400', gravity: 'center' },
+                { size: '1920x1080', gravity: 'center' },
+                { size: '800x1080', gravity: 'west' },
+                { size: '1920x400', gravity: 'center' },
+                { size: '1920x1080', gravity: 'center' },
+                { size: '800x1080', gravity: 'west' },
+                { size: '1920x400', gravity: 'center' }
+            ]
+
+            const templateIndex = sentenceIndex % templates.length
 
             gm()
-                .out('-size', templateSettings[sentenceIndex].size)
-                .out('-gravity', templateSettings[sentenceIndex].gravity)
+                .out('-size', templates[templateIndex].size)
+                .out('-gravity', templates[templateIndex].gravity)
                 .out('-background', 'transparent')
                 .out('-fill', 'white')
                 .out('-kerning', '-1')
@@ -118,8 +101,7 @@ async function robot() {
                     if (error) {
                         return reject(error)
                     }
-
-                    console.log(`> [video-robot] Sentence created: ${outputFile}`)
+                    console.log(`> [video-robot] Sentença criada: ${outputFile}`)
                     resolve()
                 })
         })
@@ -136,7 +118,7 @@ async function robot() {
                     return reject(error)
                     }
 
-                    console.log('> [video-robot] YouTube thumbnail created')
+                    console.log('> [video-robot] YouTube thumbnail criada')
                     resolve()
                 })
         })
