@@ -7,6 +7,7 @@ const fs = require('fs')
 
 
 async function robot() {
+    console.log('> [youtube-robot] Inciando...')
     const content = state.load()
 
     await authenticateWithOAuth()
@@ -56,19 +57,19 @@ async function robot() {
                 scope: ['https://www.googleapis.com/auth/youtube']
             })
 
-            console.log(`> [youtube-robot] Please give your consent: ${consentUrl}`)
+            console.log(`> [youtube-robot] Por favor, dê seu consentimento: ${consentUrl}`)
         }
 
 
          async function waitForGoogleCallback(webServer) {
             return new Promise((resolve, reject) => {
-                console.log('> [youtube-robot] Waiting for user consent...')
+                console.log('> [youtube-robot] Aguardando consentimento do usuário...')
 
                 webServer.app.get('/oauth2callback', (req, res) => {
                     const authCode = req.query.code
-                    console.log(`> [youtube-robot] Consent given: ${authCode}`)
+                    console.log(`> [youtube-robot] Consentimento dado: ${authCode}`)
 
-                res.send('<h1>Thank you!</h1><p>Now close this tab.</p>')
+                res.send('<h1>Obrigado!</h1><p>Agora feche esta aba</p>')
                 resolve(authCode)
                 })
             })
@@ -81,7 +82,7 @@ async function robot() {
                         return reject(error)
                     }
 
-                    console.log('> [youtube-robot] Access tokens received!')
+                    console.log('> [youtube-robot] Tokens de acesso recebidos!')
 
                     OAuthClient.setCredentials(tokens)
                     resolve()
@@ -131,12 +132,12 @@ async function robot() {
             }
         }
 
-        console.log('> [youtube-robot] Starting to upload the video to YouTube')
+        console.log('> [youtube-robot] Iniciando upload do vídeo para o YouTube')
         const youtubeResponse = await youtube.videos.insert(requestParameters, {
             onUploadProgress: onUploadProgress
         })
 
-        console.log(`> [youtube-robot] Video available at: https://youtu.be/${youtubeResponse.data.id}`)
+        console.log(`> [youtube-robot] ídeo disponível em: https://youtu.be/${youtubeResponse.data.id}`)
         return youtubeResponse.data
 
         function onUploadProgress(event) {
@@ -158,9 +159,9 @@ async function robot() {
         }
 
         try {
-            console.log('> [youtube-robot] Starting to upload thumbnail...')
+            console.log('> [youtube-robot] Começando a enviar a thumbnail...')
             const youtubeResponse = await youtube.thumbnails.set(requestParameters)
-            console.log(`> [youtube-robot] Thumbnail uploaded!`)
+            console.log(`> [youtube-robot] Thumbnail enviada!`)
         } catch (error) {
             console.log(`> [youtube-robot] ⚠️ Aviso: O YouTube bloqueou o upload da Thumbnail.`)
             console.log(`> [youtube-robot] Mensagem do YouTube: ${error.message}`)
